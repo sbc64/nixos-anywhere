@@ -695,11 +695,11 @@ nixosInstall() {
     step Building the system closure
     # We need to do a nix copy first because nix build doesn't have --no-check-sigs
     # Use ssh:// here to avoid https://github.com/NixOS/nix/issues/7359
-    nixCopy --to "ssh://$sshConnection?remote-store=local%3Froot=%2Fmnt&$sshStoreSettings" "${flake}#${flakeAttr}.system.build.toplevel" \
+    nixCopy --to "ssh://$sshConnection?remote-store=local%3Froot=%2Fmnt&$sshStoreSettings" "${flake}#${flakeAttr}.config.system.build.toplevel" \
       --derivation --no-check-sigs
     # If we don't use ssh-ng here, we get `error: operation 'getFSAccessor' is not supported by store`
     nixosSystem=$(
-      nixBuild "${flake}#${flakeAttr}.system.build.toplevel" \
+      nixBuild "${flake}#${flakeAttr}.config.system.build.toplevel" \
         --eval-store auto --store "ssh-ng://$sshConnection?ssh-key=$sshKeyDir%2Fnixos-anywhere&remote-store=local%3Froot=%2Fmnt&$sshStoreSettings"
     )
   fi
@@ -777,10 +777,10 @@ main() {
   if [[ -n ${flake} ]]; then
     if [[ ${buildOn} == "local" ]] && [[ ${hardwareConfigBackend} == "none" ]]; then
       if [[ ${phases[disko]} == 1 ]]; then
-        diskoScript=$(nixBuild "${flake}#${flakeAttr}.system.build.${diskoAttr}")
+        diskoScript=$(nixBuild "${flake}#${flakeAttr}.config.system.build.${diskoAttr}")
       fi
       if [[ ${phases[install]} == 1 ]]; then
-        nixosSystem=$(nixBuild "${flake}#${flakeAttr}.system.build.toplevel")
+        nixosSystem=$(nixBuild "${flake}#${flakeAttr}.config.system.build.toplevel")
       fi
     fi
   elif [[ -n ${diskoScript} ]] && [[ -n ${nixosSystem} ]]; then
